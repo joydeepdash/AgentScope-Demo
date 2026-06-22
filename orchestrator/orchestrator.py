@@ -7,11 +7,13 @@ from tavily import AsyncTavilyClient
 from agentscope.tool import ToolResponse
 from agentscope.message import TextBlock
 import asyncio
+from dotenv import load_dotenv
+load_dotenv()
 
 #needed for first three agents
 from agentscope.agent import ReActAgent
 from agentscope.model import OpenAIChatModel
-from agentscope.formatter import OpenAIChatFormatter 
+from agentscope.formatter import OpenAIChatFormatter
 from agentscope.tool import Toolkit
 from agentscope.message import Msg
 
@@ -25,7 +27,7 @@ import webbrowser
 
 
 #needed for event loop 
-
+import sys
 
 # =========================================================
 # MODEL
@@ -38,9 +40,13 @@ model = OpenAIChatModel(
 formatter = OpenAIChatFormatter()
 
 # =========================================================
-# FILE SAVE LOCATION AND PORT
+# DEPLOYMENT AND SERVING LOCATIONS
 # =========================================================
 
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(script_dir)
+
+OUTPUT_DIR = os.path.join(project_root, "output")
 PORT = 8000
 
 
@@ -245,7 +251,7 @@ Output Requirements:
 async def deploy_agent( #async used to make code refactoring easier in case we swap for a real agent
     msg: Msg,
     port: int = PORT,
-    output_dir: str = "output",
+    output_dir: str = OUTPUT_DIR,
     open_browser: bool = True,
 ) -> str:
     """Write the HTML from a Msg to disk, serve it locally, open a browser.
@@ -290,7 +296,7 @@ async def deploy_agent( #async used to make code refactoring easier in case we s
 
     # --- write the file to disk ---
     os.makedirs(output_dir, exist_ok=True)
-    file_path = os.path.abspath(os.path.join(output_dir, filename))
+    file_path = os.path.join(output_dir, filename)
     with open(file_path, "w", encoding="utf-8") as f:
         f.write(html)
 
@@ -332,24 +338,27 @@ async def deploy_agent( #async used to make code refactoring easier in case we s
     return url
 
 async def main():
+
+    if not os.getenv("OPENAI_API_KEY") or not os.getenv("TAVILY_API_KEY"):
+        sys.exit("Error: OPENAI_API_KEY and TAVILY_API_KEY must both be set.")
     
     user_input = input("> ")
-
     msg = Msg(
         name="user",
         role="user",
         content=user_input
     )
-
-    msg = await structure_agent(msg)
-
-    msg = await content_agent(msg)
-
-    msg = await builder_agent(msg)
-
-    url = await deploy_agent(msg) #await only used to keep event loop code same in case we use a real agent
-
+    try:
+        msg = await structure_agent(msg)
+        msg = await content_agent(msg)
+        msg = await builder_agent(msg)
+        url = await deploy_agent(msg) #await only used to keep event loop code same in case we use a real agent
+    except Exception as e:
+        sys.exit(f"Pipeline failed: {e}")
+        
     print(url)
+    print("Serving — press Ctrl+C to stop.")
+    await asyncio.Event().wait()
 
 if __name__ == "__main__":
     

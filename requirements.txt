@@ -1,3 +1,4 @@
 agentscope==1.0.21
 tavily-python==0.7.26
+python-dotenv==1.2.2
 
