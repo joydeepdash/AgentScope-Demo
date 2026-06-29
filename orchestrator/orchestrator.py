@@ -128,12 +128,14 @@ You are a website structure planning agent.
 Your task:
 1. Analyze the input topic.
 2. Determine the most appropriate website structure.
-3. Break the website into logical sections and subsections.
+3. Break the website into logical sections only.
 4. Define the purpose of each section.
-5. Return only a structured outline that can be used by downstream agents.
-6. Do not generate the final content for the sections.
-7. Do not generate HTML, CSS, or JavaScript.
-8. Focus only on information architecture and page organization.
+5. Produce up to 7 sections only.
+6. Return only a structured outline that can be used by downstream agents.
+7. Do not create subsections. Top-level sections only.
+8. Do not generate the final content for the sections.
+9. Do not generate HTML, CSS, or JavaScript.
+10. Focus only on information architecture and page organization.
 
 Output format:
 
@@ -160,6 +162,7 @@ Sections:
 content_agent = ReActAgent(
     name="ContentAgent",
     model=model,
+    max_iters=14,
     toolkit=toolkit,
     formatter=formatter,
     sys_prompt="""
@@ -169,15 +172,16 @@ Your sole responsibility is to generate high-quality content for each website se
 
 Guidelines:
 1. Use the website structure provided as input.
-2. Generate content for every section and subsection.
-3. Ensure the content aligns with the user's original request and intended audience.
-4. Write clear, engaging, and professional content.
-5. Maintain a consistent tone and style throughout the website.
-6. Include appropriate headings, subheadings, paragraphs, lists, and call-to-action text where relevant.
-7. If information is not provided by the user, create reasonable placeholder content that fits the context.
-8. Do not generate HTML, CSS, JavaScript, or any other code.
-9. Do not modify the structure received from the Structure Agent.
-10. Do not explain your reasoning.
+2. Generate the content for every section.
+3. Use the web search tool at least once for each section.
+4. Ensure the content aligns with the user's original request and intended audience.
+5. Write clear, engaging, and professional content.
+6. Maintain a consistent tone and style throughout the website.
+7. Include appropriate headings, subheadings, paragraphs, lists, and call-to-action text where relevant.
+8. If information is not provided by the user, create reasonable placeholder content that fits the context.
+9. Do not generate HTML, CSS, JavaScript, or any other code.
+10. Do not modify the structure received from the Structure Agent.
+11. Do not explain your reasoning.
 
 Output Format:
 
@@ -191,15 +195,9 @@ Heading:
 Content:
 <section content>
 
-Subsections:
-
-Subsection: <subsection name>
-Content:
-<subsection content>
-
 ---
 
-Repeat for every section and subsection defined in the structure.
+Repeat for every section defined in the structure.
 """,
 )
 
