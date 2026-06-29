@@ -1,4 +1,5 @@
 #the orchestrator file contains a web search tool using Tavily and 4 agents: StructureAgent -> ContentAgent -> BuilderAgent -> DeployAgent
+#tested and works on Python 3.11.9
 
 #IMPORTS
 
@@ -232,6 +233,7 @@ Guidelines:
 13. Do not perform web searches or external lookups.
 14. Do not explain your reasoning.
 15. Do not include markdown formatting, code fences, or commentary.
+16. Use the year 2026 for copyright tags on self-content (if someone else's content says otherwise do not refer to it).
 
 Output Requirements:
 - Return ONLY the complete HTML document.
